@@ -5,11 +5,11 @@ Started as a joke when a collegue of mine told me I should write Pong in C, so I
 
 ## TODO
 
-[ ] - Finish SDL implementation.
-[ ] - Add sound output.
-[ ] - Clean up the garbage.
-[ ] - Add debugging window.
-[ ] - Maybe add Super CHIP-8?
+- [ ] Finish SDL implementation.
+- [ ] Add sound output.
+- [ ] Clean up the garbage.
+- [ ] Add debugging window.
+- [ ] Maybe add Super CHIP-8?
 
 ## Credits && References
 
