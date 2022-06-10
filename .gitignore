@@ -1,0 +1,7 @@
+**/.vscode
+**/binary
+**/objfiles
+**/roms
+**/SDL2-2.0.20
+arc_chip8_lib.c
+debug_test
