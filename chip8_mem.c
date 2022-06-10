@@ -123,9 +123,7 @@ int emulateCycle(chip8_mem *memory)
             opcode_digits->VX = (opcode_digits->OPCODE >> 8) & 0xF; 
             opcode_digits->VY = (opcode_digits->OPCODE >> 4) & 0xF;
             opcode_digits->N = (opcode_digits->OPCODE) & 0xF;
-
             opcode_digits->NN = (opcode_digits->N) | (opcode_digits->VY) << 4;
-
             opcode_digits->DECODED = ((opcode_digits->OPCODE) & 0xF000) >> 12;
 
             memory->PC += 2;
@@ -160,6 +158,6 @@ void Debug (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-            printf("\033[17F");
-            usleep(1000000);
+    printf("\033[17F");
+    usleep(1000000);
 }
