@@ -1,7 +1,7 @@
 # CHIP-8 Emulator
 
 A fun side project I've been working on for some time now.
-Started as a joke when a collegue of mine told me I should write Pong in C, so I cut out the middle man and decided to build an emulator.
+CHIP-8 emulator written in C using SDL as the graphics library.
 
 ## TODO
 
