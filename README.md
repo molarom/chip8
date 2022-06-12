@@ -1,7 +1,6 @@
 # CHIP-8 Emulator
 
-A fun side project I've been working on for some time now.
-CHIP-8 emulator written in C using SDL as the graphics library.
+CHIP-8 emulator written in C using SDL as the graphics library. Used this as practice for learning more about C. Not currently working.
 
 ## TODO
 
