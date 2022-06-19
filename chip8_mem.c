@@ -1,5 +1,6 @@
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
+#include "chip8_sdl.h"
 
 #include <unistd.h>
 
@@ -43,13 +44,13 @@ opcode_func subroutines[16] = {
     &subfunc_ex                 //FXXX
 };
 
-int initialize(int debug, chip8_mem *memory)
+int init_memory(int debug, chip8_mem *memory)
 {
-    memory->PC      = 0x200;              // Program counter starts at 0x200.
+    memory->PC      = 0x200;                  // Program counter starts at 0x200.
     memory->I       = 0x000;                  // Reset index register.
-    memory->SP      = STACK_EMPTY;        // Reset stack pointer.
+    memory->SP      = STACK_EMPTY;            // Reset stack pointer.
 
-    // TODO: Clear display
+    memset(&gfx, 0, sizeof gfx );                       // Initialize output graphics array.
     memset(memory->STACK, 0, sizeof memory->STACK);     // Clear stack
     memset(memory->V, 0, sizeof memory->V);             // Clear registers V0-VF
     memset(memory->RAM, 0, sizeof memory->RAM);         // Clear memory
@@ -74,7 +75,7 @@ int initialize(int debug, chip8_mem *memory)
     return 0;
 }
 
-int loadGame(char *game, chip8_mem *memory)
+int load_game(char *game, chip8_mem *memory)
 {
     FILE * fp;
 
@@ -90,7 +91,7 @@ int loadGame(char *game, chip8_mem *memory)
     rewind(fp);
 
     // Load our program into memory starting at 0x200 == 512.
-    uint8_t *buffer = malloc(fSize);
+    uint8_t *buffer = (uint8_t *) malloc(fSize);
 
     if (buffer != NULL){
         fread(buffer, fSize, 1, fp);
@@ -106,41 +107,30 @@ int loadGame(char *game, chip8_mem *memory)
     return 0;
 }
 
-int emulateCycle(chip8_mem *memory)
+int cpu_cycle(int debugFlag, chip8_mem *memory, chip8_opcode *opcode_digits)
 {
-    chip8_opcode *opcode_digits;
+    opcode_digits->OPCODE = memory->RAM[memory->PC];
+    opcode_digits->OPCODE <<= 8;
+    opcode_digits->OPCODE |= memory->RAM[memory->PC + 1];
 
-    opcode_digits = (chip8_opcode *)(malloc(sizeof(chip8_opcode)));
+    // Split up our OPCODE into usable values.
+    opcode_digits->ADDR = (opcode_digits->OPCODE) & 0x0FFF;
+    opcode_digits->VX = (opcode_digits->OPCODE >> 8) & 0xF; 
+    opcode_digits->VY = (opcode_digits->OPCODE >> 4) & 0xF;
+    opcode_digits->N = (opcode_digits->OPCODE) & 0xF;
+    opcode_digits->NN = (opcode_digits->N) | (opcode_digits->VY) << 4;
+    opcode_digits->DECODED = ((opcode_digits->OPCODE) & 0xF000) >> 12;
 
-    if (opcode_digits != NULL) {
-        for (;;){
-            opcode_digits->OPCODE = memory->RAM[memory->PC];
-            opcode_digits->OPCODE <<= 8;
-            opcode_digits->OPCODE |= memory->RAM[memory->PC + 1];
+    if (debugFlag)
+        debugMem(memory, opcode_digits);
+    
+    memory->PC += 2;
+    subroutines[opcode_digits->DECODED](memory, opcode_digits);
 
-            // Split up our OPCODE into usable values.
-            opcode_digits->ADDR = (opcode_digits->OPCODE) & 0x0FFF;
-            opcode_digits->VX = (opcode_digits->OPCODE >> 8) & 0xF; 
-            opcode_digits->VY = (opcode_digits->OPCODE >> 4) & 0xF;
-            opcode_digits->N = (opcode_digits->OPCODE) & 0xF;
-            opcode_digits->NN = (opcode_digits->N) | (opcode_digits->VY) << 4;
-            opcode_digits->DECODED = ((opcode_digits->OPCODE) & 0xF000) >> 12;
-
-            memory->PC += 2;
-
-            subroutines[opcode_digits->DECODED](memory, opcode_digits);
-        }
-
-    } else {
-        printf("failed to initialized memory for opcode_digits.");
-        return 1;
-    }
-
-    free(opcode_digits);
     return 0;
 }
 
-void Debug (chip8_mem *memory, chip8_opcode *opcode_digits) {
+void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("----------OPCODES------------\n");
     printf("OPCODE: %04x \n", opcode_digits->OPCODE);
     printf("DECODED: %04x \n", opcode_digits->DECODED);
@@ -151,13 +141,23 @@ void Debug (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("V[2]: %04x\n", memory->V[2]);
     printf("V[3]: %04x\n", memory->V[3]);
     printf("V[4]: %04x\n", memory->V[4]);
-    printf("V[15]: %04x\n", memory->V[15]);
+    printf("V[5]: %04x\n", memory->V[5]);
+    printf("V[6]: %04x\n", memory->V[6]);
+    printf("V[7]: %04x\n", memory->V[7]);
+    printf("V[8]: %04x\n", memory->V[8]);
+    printf("V[9]: %04x\n", memory->V[9]);
+    printf("V[10]: %04x\n", memory->V[10]);
+    printf("V[11]: %04x\n", memory->V[11]);
+    printf("V[12]: %04x\n", memory->V[12]);
+    printf("V[13]: %04x\n", memory->V[13]);
+    printf("V[14]: %04x\n", memory->V[14]);
+    printf("V[15](FLAG): %04x\n", memory->V[15]);
     printf("I: %04x\n", memory->I);
     printf("\n-----------STACK------------\n");
     printf("STACK[0]: %04x\n", memory->STACK[0]);
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-    printf("\033[17F");
+    printf("\033[26F");
     usleep(1000000);
 }

@@ -5,19 +5,13 @@
 #include <time.h>
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
-
-// Temporary arrays for graphics
-uint8_t old_gfx[64][32];
-uint8_t gfx[64][32];
+#include "chip8_sdl.h" // old_gfx, gfx, and draw_flag defined here.
 
 void subroutine (chip8_mem *memory, chip8_opcode *opcode) 
 { 
     if (opcode->OPCODE == 0x00E0) {
-        for(int i=0; i < 64; ++i) {
-			for(int j=0; j < 32; ++j) {	
-				gfx[i][j] = 0x0;
-			}
-		}
+		memset(&gfx, 0, sizeof gfx );
+
     } else if (opcode->OPCODE == 0x00EE){
         memory->PC = pop(memory);
     }
@@ -169,31 +163,30 @@ void random_val (chip8_mem *memory, chip8_opcode *opcode)
 
 void draw (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    int x = opcode->VX % 64;
-    int y = opcode->VY % 32;
+    int x = (opcode->VX) % 64;
+    int y = (opcode->VY) % 32;
     uint8_t pixel;
     memory->V[0xF] = 0;
 
-    // Draw code taken from Spittle https://github.com/Spittle/chip8-SDL
+    for (int y_line = 0; y_line < opcode->N ; y_line++) {
+        pixel = memory->RAM[ memory->I + y_line ];
 
-    for (int i=0; i<64; i++) {
-		for (int j=0; j<32; j++) {
-			old_gfx[i][j] = gfx[i][j];
-		}
-	}
-
-    for (int i = 0; i < opcode->N ; i++) {
-        pixel = memory->RAM[memory->I + i];
-        for (int j = 0; j < 8; j++) {
-            if ((pixel & (0x80 >> j)) != 0 )
-                printf("%c", gfx[x+j][y+i]);
-
-                if (gfx[x+j][y+i]) {
+        for (int x_line = 0; x_line < 8; x_line++) {
+            int cur_pixel  = (x + x_line) + (y * y_line);
+            if(pixel & (0x80 >> x)) { 
+                if((gfx[cur_pixel] & 0xFF) == 1){
                     memory->V[0xF] = 1;
+                    gfx[cur_pixel] ^= 0xFF;
+                } else {
+                    gfx[cur_pixel] = 0xFF;
                 }
-            gfx[x+j][y+i] ^= 1;
+            }
         }
     }
+
+
+		
+    draw_flag = 1;
 }
 
 void keypress (chip8_mem *memory, chip8_opcode *opcode) {

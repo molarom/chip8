@@ -3,33 +3,35 @@
 
 #include <SDL2/SDL.h>
 
+/*------------------------------------------------------------------------/
+/ * Establish globals for SDL constants, and graphics.
+/------------------------------------------------------------------------*/
+
 #define QUITKEY SDLK_ESCAPE
 #define WIDTH 64
 #define HEIGHT 32
-/*------------------------------------------------------------------------/
-/ * Struct to establish values for generic CHIP 8 display output.
-/------------------------------------------------------------------------*/
+#define SCALE 10
+// #define SDL_INIT_CHIP8 ( SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_AUDIO )
 
-
-// TODO
-
-SDL_Event event;
-SDL_Renderer *renderer;
-SDL_Window *window;
-/*
 typedef struct {
-    
-    uint8_t gfx[64 * 32];
-}
-*/
+    SDL_Window *window;
+	SDL_Renderer *renderer;
+	SDL_Texture *texture;
+} chip8_screen;
 
-// Output err to screen.
-void LogError(char*);
+uint8_t old_gfx[WIDTH * HEIGHT * SCALE];
+uint8_t gfx[WIDTH * HEIGHT * SCALE];
+uint8_t draw_flag;
+
+// Initialize SDL window and texture surface.
+int sdl_init (chip8_screen *chip8_screen);
+
+void sdl_draw (uint8_t *, chip8_screen *chip8_screen);
 
 // Can change the window caption based on state.
 void SetCaption(char*);
 
 // Clean up SDL.
-void FinishOff();
+void sdl_teardown(chip8_screen *chip8_screen);
 
 #endif

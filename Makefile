@@ -1,6 +1,6 @@
 VPATH = %.o objfiles
 
-SRC = chip8_cpu.c chip8_mem.c chip8_sdl.c unit_test.c
+SRC = chip8_sdl.c chip8_cpu.c chip8_mem.c unit_test.c
 
 CFLAGS = -Wall -Wextra 
 SDLLIBS = `sdl2-config --cflags --libs`
@@ -13,19 +13,21 @@ test: $(UNITTEST)
 	gcc -o $@ $(CFLAGS) $(UNITTEST) $(SDLLIBS)
 
 debug_test: $(UNITTEST)
-	gcc -g -fsanitize=address -o $@ $(CFLAGS) $(UNITTEST) $(SDLLIBS)
+	gcc -g3 -o $@ $(CFLAGS) $(UNITTEST) $(SDLLIBS)
 
 objfiles/chip8_cpu.o: chip8_cpu.c
-	gcc -g -c $< -o $@
+	gcc -g3 -c $< -o $@
 
 objfiles/chip8_mem.o: chip8_mem.c
-	gcc -g -c $< -o $@
+	gcc -g3 -c $< -o $@
 
 objfiles/chip8_sdl.o: chip8_sdl.c
-	gcc -g -c $< -o $@
+	gcc -g3 -c $< -o $@
 
 objfiles/unit_test.o: unit_test.c
-	gcc -g -c $< -o $@
+	gcc -g3 -c $< -o $@
+
+
 
 .PHONY:
 	clean

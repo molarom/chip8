@@ -20,13 +20,13 @@ int main (int argc, char **argv)
     setupInput();
 
     // Initialize the Chip8 system and load the game.
-    initialize();
-    loadGame(argv[1]);
+    init_memory();
+    load_game(argv[1]);
 
     // Emulation loop
     for(;;){
         // Emulate one cycle
-        emulateCycle();
+        cpu_cycle();
 
         // If the draw flag is set, update the screen
         if(drawFlag)

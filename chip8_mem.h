@@ -41,12 +41,15 @@ typedef struct {
 /------------------------------------------------------------------------*/
 
 // Initialize our memory values on "boot".
-int initialize(int debug, chip8_mem *);
+int init_memory(int, chip8_mem *);
 
 // Load our ROM into the memory buffer. Must run after initialize.
-int loadGame(char *, chip8_mem *);
+int load_game(char *, chip8_mem *);
 
 // Fetch, Decode, Execute every opcode from the ROM loaded into memory.
-int emulateCycle(chip8_mem *);
+int cpu_cycle(int, chip8_mem *, chip8_opcode *);
+
+// Print live memory information, suppresses all other output currently.
+void debugMem(chip8_mem *, chip8_opcode *);
 
 #endif

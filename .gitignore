@@ -2,6 +2,5 @@
 **/binary
 **/objfiles
 **/roms
-**/SDL2-2.0.20
-arc_chip8_lib.c
+**/sdl_test
 debug_test
