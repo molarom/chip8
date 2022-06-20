@@ -10,7 +10,7 @@
 void subroutine (chip8_mem *memory, chip8_opcode *opcode) 
 { 
     if (opcode->OPCODE == 0x00E0) {
-		memset(&gfx, 0, sizeof gfx );
+		memset(memory->gfx, 0, sizeof memory->gfx );
 
     } else if (opcode->OPCODE == 0x00EE){
         memory->PC = pop(memory);
@@ -163,38 +163,52 @@ void random_val (chip8_mem *memory, chip8_opcode *opcode)
 
 void draw (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    int x = (opcode->VX) % 64;
-    int y = (opcode->VY) % 32;
+    // Removed modulo operations, since we're not working with a 2D array.
+    int x = (memory->V[ opcode->VX ]);
+    int y = (memory->V[ opcode->VY ]);
     uint8_t pixel;
     memory->V[0xF] = 0;
 
     for (int y_line = 0; y_line < opcode->N ; y_line++) {
         pixel = memory->RAM[ memory->I + y_line ];
-
         for (int x_line = 0; x_line < 8; x_line++) {
-            int cur_pixel  = (x + x_line) + (y * y_line);
-            if(pixel & (0x80 >> x)) { 
-                if((gfx[cur_pixel] & 0xFF) == 1){
+            if((pixel & (0x80 >> x_line)) != 0) {
+                int pixel_pos  = ((x + x_line) % WIDTH) + ((y + y_line) % HEIGHT) * WIDTH;
+                if(memory->gfx[pixel_pos] == 0xFFFFFF){
                     memory->V[0xF] = 1;
-                    gfx[cur_pixel] ^= 0xFF;
+                    memory->gfx[pixel_pos] = 0;
                 } else {
-                    gfx[cur_pixel] = 0xFF;
+                    memory->gfx[pixel_pos] = 0xFFFFFF;
                 }
             }
         }
     }
-
-
 		
-    draw_flag = 1;
+    memory->draw_flag = 1;
 }
 
 void keypress (chip8_mem *memory, chip8_opcode *opcode) {
-    //TODO
+    if (opcode->NN == 0x9E){
+
+        // memory->PC += 2;
+    } else if (opcode->NN == 0xA1) {
+        
+        // memory->PC += 2;
+    }
 }
 
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
-    //TODO
+    switch (opcode->NN){
+        case 0x07: break;
+        case 0x15: break;
+        case 0x17: break;
+        case 0x1E: break;
+        case 0x0A: break;
+        case 0x29: break;
+        case 0x33: break;
+        case 0x55: break;
+        case 0x65: break;
+    }
 }
 
 /*------------------------------------------------------------------------/

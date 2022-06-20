@@ -19,14 +19,10 @@ typedef struct {
 	SDL_Texture *texture;
 } chip8_screen;
 
-uint8_t old_gfx[WIDTH * HEIGHT * SCALE];
-uint8_t gfx[WIDTH * HEIGHT * SCALE];
-uint8_t draw_flag;
-
 // Initialize SDL window and texture surface.
 int sdl_init (chip8_screen *chip8_screen);
 
-void sdl_draw (uint8_t *, chip8_screen *chip8_screen);
+void sdl_draw (uint32_t *, chip8_screen *chip8_screen);
 
 // Can change the window caption based on state.
 void SetCaption(char*);

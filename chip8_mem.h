@@ -6,6 +6,9 @@
 #include <string.h>
 #include <inttypes.h>
 
+#define WIDTH 64
+#define HEIGHT 32
+
 /*------------------------------------------------------------------------/
 / * Struct to establish values for CHIP 8's memory.
 /------------------------------------------------------------------------*/
@@ -19,6 +22,8 @@ typedef struct {
     uint16_t PC;
     uint8_t delay_timer;
     uint8_t sound_timer;
+    uint32_t gfx[WIDTH * HEIGHT];
+    uint8_t draw_flag;
 
 } chip8_mem;
 

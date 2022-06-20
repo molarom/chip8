@@ -13,7 +13,7 @@ int sdl_init (chip8_screen *chip8_screen)
     chip8_screen->window = SDL_CreateWindow("Chip8 Emulator", 
                                             SDL_WINDOWPOS_CENTERED, 
                                             SDL_WINDOWPOS_CENTERED, 
-                                            WIDTH * SCALE, HEIGHT * SCALE, 0);
+                                            WIDTH * 10, HEIGHT * 10, 0);
     if(!chip8_screen->window){
         printf("Couldn't create window: %s\n", SDL_GetError());
         sdl_teardown(chip8_screen);
@@ -26,7 +26,14 @@ int sdl_init (chip8_screen *chip8_screen)
         printf("Couldn't create renderer: %s\n", SDL_GetError());
         sdl_teardown(chip8_screen);
     }
-
+/*
+    // Create surface to write 8 bit values per pixel.
+    chip8_screen->surface = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 8, 0, 0, 0, 0);
+    if (!chip8_screen->surface) {
+        printf("Couldn't create surface: %s", SDL_GetError());
+        sdl_teardown(chip8_screen);
+    }
+*/
     // Create texture with streaming access to modify pixels.
     chip8_screen->texture = SDL_CreateTexture(chip8_screen->renderer,
                                             SDL_PIXELFORMAT_ARGB8888,           
@@ -37,26 +44,13 @@ int sdl_init (chip8_screen *chip8_screen)
         sdl_teardown(chip8_screen);
     }
 
-    return 0;
-    
+    return 0;    
 }
 
-void sdl_draw (uint8_t *pixels, chip8_screen *chip8_screen)
+void sdl_draw (uint32_t pixels[], chip8_screen *chip8_screen)
 {
-    // texture_pitch: the height of the window to lock for writing.
-    // texture_pixels: The pixel array we write to the screen.
-
-    int texture_pitch = 0;
-    void *texture_pixels = NULL;
-
-    if(SDL_LockTexture(chip8_screen->texture, NULL, &texture_pixels, &texture_pitch) != 0){
-        printf("Unable to lock texture for writing: %s\n", SDL_GetError());
-    } else {
-        memcpy (texture_pixels, pixels, texture_pitch * HEIGHT);
-    }
-    SDL_UnlockTexture(chip8_screen->texture);
-
-    // Update the renderer with our new texture.
+    // Update the texture with the filled pixel array, then render the texture.
+    SDL_UpdateTexture(chip8_screen->texture, NULL, pixels, WIDTH * sizeof(uint32_t));
     SDL_RenderClear(chip8_screen->renderer);
     SDL_RenderCopy(chip8_screen->renderer, chip8_screen->texture, NULL, NULL);
     SDL_RenderPresent(chip8_screen->renderer);

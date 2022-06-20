@@ -50,7 +50,7 @@ int init_memory(int debug, chip8_mem *memory)
     memory->I       = 0x000;                  // Reset index register.
     memory->SP      = STACK_EMPTY;            // Reset stack pointer.
 
-    memset(&gfx, 0, sizeof gfx );                       // Initialize output graphics array.
+    memset(memory->gfx, 0, sizeof memory->gfx );                       // Initialize output graphics array.
     memset(memory->STACK, 0, sizeof memory->STACK);     // Clear stack
     memset(memory->V, 0, sizeof memory->V);             // Clear registers V0-VF
     memset(memory->RAM, 0, sizeof memory->RAM);         // Clear memory
@@ -158,6 +158,5 @@ void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-    printf("\033[26F");
-    usleep(1000000);
+    printf("\033[25F");
 }

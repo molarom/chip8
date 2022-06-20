@@ -31,26 +31,22 @@ int main(int argc, char **argv)
 	if(file_err)
 		exit(-1);
 
-	/* SDL Test data.
-	uint8_t pixel_junk[WIDTH * HEIGHT * SCALE] = {0};
-
-	memset(pixel_junk, 0xFF, sizeof pixel_junk);
-	*/
-
 	while (!quit){
     	while (SDL_PollEvent(&event)){
     	    if (event.type == SDL_QUIT){
     	        quit = 1;
     	    }
-			//debugFlag = 1;
+			// debugFlag = 1;
 			cpu_cycle(debugFlag, mem, opcode);
 
-			if(draw_flag) {
-				sdl_draw(gfx, screen);
+			if(mem->draw_flag) {
+				sdl_draw(mem->gfx, screen);
 			}
 
-			draw_flag = 0;
+			mem->draw_flag = 0;
 		}
+
+		SDL_Delay(2);
 	}
 
 	sdl_teardown(screen);
