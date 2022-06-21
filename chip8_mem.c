@@ -29,13 +29,13 @@ opcode_func subroutines[16] = {
     &subroutine,                //0XXX
     &jump_to,                   //1XXX
     &call,                      //2XXX
-    &eval_ne_uchar,             //3XXX
-    &eval_eq,                   //4XXX
-    &eval_ne_reg,               //5XXX
+    &eval_eq_uchar,             //3XXX
+    &eval_ne,                   //4XXX
+    &eval_eq_reg,               //5XXX
     &set_val_to_reg,            //6XXX
     &add_val_to_reg,            //7XXX
     &reg_sub_func,              //8XXX
-    &eval_eq_reg,               //9XXX
+    &eval_ne_reg,               //9XXX
     &set_index_reg,             //AXXX
     &jump_add_offset,           //BXXX
     &random_val,                //CXXX
@@ -158,5 +158,5 @@ void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-    printf("\033[25F");
+    //printf("\033[25F");
 }

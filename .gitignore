@@ -1,6 +1,7 @@
 **/.vscode
 **/binary
 **/objfiles
-**/roms
 **/sdl_test
 debug_test
+.DS_Store
+chip8

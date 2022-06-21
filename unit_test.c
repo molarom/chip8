@@ -6,13 +6,9 @@ int main(int argc, char **argv)
 {
 	SDL_Event event;
 
-	int keypressed;
 	int debugFlag = 0;
 	int file_err = 0;
-	int sdl_err = 0;
 	int quit = 0;
-
-	// Library Function testing.
 
 	chip8_screen *screen = (chip8_screen *) malloc(sizeof(chip8_screen));
 
@@ -28,25 +24,27 @@ int main(int argc, char **argv)
 		init_memory(debugFlag, mem);
 
 	file_err = load_game(argv[1], mem);
-	if(file_err)
+	if(file_err) {
+		sdl_teardown(screen);
 		exit(-1);
+	}
 
 	while (!quit){
-    	while (SDL_PollEvent(&event)){
+    	if (SDL_PollEvent(&event)){
     	    if (event.type == SDL_QUIT){
     	        quit = 1;
     	    }
-			// debugFlag = 1;
-			cpu_cycle(debugFlag, mem, opcode);
-
-			if(mem->draw_flag) {
-				sdl_draw(mem->gfx, screen);
-			}
-
-			mem->draw_flag = 0;
 		}
 
-		SDL_Delay(2);
+		cpu_cycle(debugFlag, mem, opcode);
+		tick(mem);
+
+		if(mem->draw_flag) {
+			sdl_draw(mem->gfx, screen);
+		}
+		mem->draw_flag = 0;
+
+		SDL_Delay(20);
 	}
 
 	sdl_teardown(screen);

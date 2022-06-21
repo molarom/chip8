@@ -11,7 +11,6 @@ void subroutine (chip8_mem *memory, chip8_opcode *opcode)
 { 
     if (opcode->OPCODE == 0x00E0) {
 		memset(memory->gfx, 0, sizeof memory->gfx );
-
     } else if (opcode->OPCODE == 0x00EE){
         memory->PC = pop(memory);
     }
@@ -21,9 +20,6 @@ void subroutine (chip8_mem *memory, chip8_opcode *opcode)
 void jump_to (chip8_mem *memory, chip8_opcode *opcode) 
 { 
     memory->PC = opcode->ADDR;
-
-    // Make sure our jmp to addr is correct.
-    memory->PC -= 2; 
 }
 
 void call (chip8_mem *memory, chip8_opcode *opcode) 
@@ -32,23 +28,23 @@ void call (chip8_mem *memory, chip8_opcode *opcode)
     memory->PC = opcode->ADDR;
 }
 
-void eval_ne_uchar (chip8_mem *memory, chip8_opcode *opcode) 
-{
-    if (memory->V[ opcode->VX ] != opcode->NN) {
-        memory->PC += 2;
-    }
-}
-
-void eval_eq (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_eq_uchar (chip8_mem *memory, chip8_opcode *opcode) 
 {
     if (memory->V[ opcode->VX ] == opcode->NN) {
         memory->PC += 2;
     }
 }
 
-void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_ne (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    if (memory->V[ opcode->VX ] != memory->V[ opcode-> VY]) {
+    if (memory->V[ opcode->VX ] != opcode->NN) {
+        memory->PC += 2;
+    }
+}
+
+void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode) 
+{
+    if (memory->V[ opcode->VX ] == memory->V[ opcode-> VY]) {
         memory->PC += 2;
     }
 
@@ -70,21 +66,13 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
 
     switch (opcode->N)
     {
-    case 0x0:
-        memory->V[ opcode->VX ] = memory->V[ opcode->VY ];
-        break;
+    case 0x0: memory->V[ opcode->VX ] = memory->V[ opcode->VY ]; break;
 
-    case 0x1:
-        memory->V[ opcode->VX ] |= memory->V[ opcode->VY ];
-        break;
+    case 0x1: memory->V[ opcode->VX ] |= memory->V[ opcode->VY ]; break;
     
-    case 0x2:
-        memory->V[ opcode->VX ] &= memory->V[ opcode->VY ];
-        break;
+    case 0x2: memory->V[ opcode->VX ] &= memory->V[ opcode->VY ]; break;
     
-    case 0x3:
-        memory->V[ opcode->VX ] ^= memory->V[ opcode->VY ];
-        break;
+    case 0x3: memory->V[ opcode->VX ] ^= memory->V[ opcode->VY ]; break;
     
     case 0x4:
         overflow_chk = memory->V[ opcode->VX ] + memory->V[ opcode->VX ];
@@ -126,7 +114,7 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
         if( memory->V[ opcode->VX ] & 0x01 )
             memory->V[0xF] = 1;
 
-        memory->V[ opcode->VX ] = (memory->V[ opcode->VX ]) >> 1;
+        memory->V[ opcode->VX ] = (memory->V[ opcode->VX ]) << 1;
         break;
     
     default:
@@ -134,11 +122,10 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
     }
 }
 
-void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    if ( memory->V[ opcode->VX ] == memory->V[opcode->VY] ) {
-        memory->PC += 2;
-    }  
+    if ( memory->V[ opcode->VX ] != memory->V[opcode->VY] )
+        memory->PC += 2; 
 }
 
 void set_index_reg (chip8_mem *memory, chip8_opcode *opcode) 
@@ -163,7 +150,6 @@ void random_val (chip8_mem *memory, chip8_opcode *opcode)
 
 void draw (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    // Removed modulo operations, since we're not working with a 2D array.
     int x = (memory->V[ opcode->VX ]);
     int y = (memory->V[ opcode->VY ]);
     uint8_t pixel;
@@ -189,25 +175,67 @@ void draw (chip8_mem *memory, chip8_opcode *opcode)
 
 void keypress (chip8_mem *memory, chip8_opcode *opcode) {
     if (opcode->NN == 0x9E){
-
-        // memory->PC += 2;
+        if ( SDL_GetKeyboardState(NULL)[keypad[memory->V[ opcode->VX ]]] )
+             memory->PC += 2;
     } else if (opcode->NN == 0xA1) {
-        
-        // memory->PC += 2;
+        if ( !SDL_GetKeyboardState(NULL)[keypad[memory->V[ opcode->VX ]]] )
+            memory->PC += 2;
     }
 }
 
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
+    int result = 0;
+
     switch (opcode->NN){
-        case 0x07: break;
-        case 0x15: break;
-        case 0x17: break;
-        case 0x1E: break;
-        case 0x0A: break;
-        case 0x29: break;
-        case 0x33: break;
-        case 0x55: break;
-        case 0x65: break;
+        case 0x07:
+            memory->V[ opcode->VX ] = memory->delay_timer;
+            break;
+        case 0x0A: 
+            for (int i = 0; i < 15; i++) {
+                if ( SDL_GetKeyboardState(NULL)[keypad[i]] )
+                    memory->V[ opcode->VX ] = i;
+                    memory->PC += 4;
+            }
+
+            memory->PC -= 2;
+            break;
+        case 0x15: memory->delay_timer = memory->V[ opcode->VX ]; break;
+        case 0x18: memory->sound_timer = memory->V[ opcode->VX ]; break;
+        case 0x1E:
+            result = memory->I + (memory->V[ opcode->VX ]);
+            if ( result > 0xFFF )
+                memory->V[0xF] = 1;
+
+            memory->I += result & 0xFFF;
+            break;
+        case 0x29: memory->I = 5 * memory->V[ opcode->VX ]; break;
+        case 0x33: 
+            memory->RAM[memory->I] = (memory->V[ opcode->VX ] % 1000) / 100;
+            memory->RAM[memory->I + 1] = (memory->V[ opcode->VX ] % 100) / 10;
+            memory->RAM[memory->I + 2] = (memory->V[ opcode->VX ] % 10);
+            break;
+        case 0x55: 
+            for (int i = 0; i <= opcode->VX; i++) { 
+                memory->RAM[memory->I + i] = memory->V[i]; 
+            }
+            break;
+        case 0x65: 
+            for (int i = 0; i <= opcode->VX; i++) { 
+                 memory->V[i] = memory->RAM[memory->I + i]; 
+            }
+        break;
+    }
+}
+
+void tick(chip8_mem *memory)
+{
+    if (memory->delay_timer > 0) {
+        --memory->delay_timer;
+    }
+
+    if (memory->sound_timer > 0) {
+        if (--memory->sound_timer == 0)
+            printf("BEEP!\n");
     }
 }
 
@@ -226,9 +254,9 @@ int push(chip8_mem *memory)
 
 uint16_t pop(chip8_mem *memory)
 {
-    if (memory->SP == STACK_EMPTY) return STACK_EMPTY;
+    if (memory->SP == STACK_EMPTY) return memory->PC;
 
-    uint16_t stk_inst = memory->STACK[memory->SP];
     memory->SP--;
+    uint16_t stk_inst = memory->STACK[memory->SP];
     return stk_inst;
 }

@@ -25,13 +25,13 @@ void call (chip8_mem *memory, chip8_opcode *opcode);
 /------------------------------------------------------------------------*/
 
 // 3XXX: If VX != NN
-void eval_ne_uchar (chip8_mem *memory, chip8_opcode *opcode);
+void eval_eq_uchar (chip8_mem *memory, chip8_opcode *opcode);
 
 // 4XXX: If VX == NN
-void eval_eq (chip8_mem *memory, chip8_opcode *opcode);
+void eval_ne (chip8_mem *memory, chip8_opcode *opcode);
 
 // 5XXX: If VX != VY
-void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode);
+void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode);
 
 // 6XXX: If VX == VY
 void set_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
@@ -54,11 +54,9 @@ void add_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
 */
 void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode);
 
-void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode);
+void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode);
 
 void set_index_reg (chip8_mem *memory, chip8_opcode *opcode);
-
-
 
 void jump_add_offset (chip8_mem *memory, chip8_opcode *opcode);
 
@@ -69,6 +67,8 @@ void draw (chip8_mem *memory, chip8_opcode *opcode);
 void keypress (chip8_mem *memory, chip8_opcode *opcode);
 
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode);
+
+void tick (chip8_mem *memory);
 
 // Stack Management, size is set to 15 to prevent overwriting reserved register.
 #define STACK_SIZE 15
