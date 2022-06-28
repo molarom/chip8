@@ -14,6 +14,9 @@ chip8: $(OBJFILES)
 debug_test: $(UNITTEST)
 	gcc -g3 -o $@ $(CFLAGS) $(UNITTEST) $(SDLLIBS)
 
+objfiles/main.o: main.c
+	gcc -c $< -o $@
+
 objfiles/chip8_cpu.o: chip8_cpu.c
 	gcc -c $< -o $@
 
@@ -21,9 +24,6 @@ objfiles/chip8_mem.o: chip8_mem.c
 	gcc -c $< -o $@
 
 objfiles/chip8_sdl.o: chip8_sdl.c
-	gcc -c $< -o $@
-
-objfiles/main.o: main.c
 	gcc -c $< -o $@
 
 objfiles/Dchip8_cpu.o: chip8_cpu.c

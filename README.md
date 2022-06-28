@@ -1,14 +1,21 @@
 # CHIP-8 Emulator
 
-CHIP-8 emulator written in C using SDL as the graphics library. Used this as practice for learning more about C.
+CHIP-8 emulator written in C using SDL as the graphics and input library. Used this as practice for learning more about C.
+
+## Building
+
+``` make chip8 ```
+
+## Running
+
+``` ./chip8 <rom.ch8>```
+``` For debugging information add --debug ```
 
 ## TODO
 
-- [ ] Fix keypress handling.
-- [ ] Fix graphics going haywire with movement.
 - [ ] Add sound output.
-- [ ] Clean up the garbage.
-- [ ] Add debugging window.
+- [ ] Fix collision bug.
+- [ ] Maybe add GUI?
 - [ ] Maybe add Super CHIP-8?
 
 ## Credits & References

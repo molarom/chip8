@@ -1,17 +1,25 @@
 /*
 *   Simple CHIP-8 emulator
 */
+#include <strings.h>
 #include "chip8_sdl.h"
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
 
 int main(int argc, char **argv)
 {
+	int debug_flag = 0;
+	int quit = 0;
 	SDL_Event event;
 
-	int debugFlag = 0;
-	int file_err = 0;
-	int quit = 0;
+	if (argc > 2) {
+		if (strncmp(argv[2], "--debug", 7) == 0) {
+			debug_flag = 1;
+		} else {
+			printf("usage: ./chip8 <rom.ch8> --debug\n");
+			exit(-1);
+		}
+	}
 
 	chip8_screen *screen = (chip8_screen *) malloc(sizeof(chip8_screen));
 
@@ -24,9 +32,9 @@ int main(int argc, char **argv)
 
 
 	if (mem != NULL)
-		init_memory(debugFlag, mem);
+		init_memory(debug_flag, mem);
 
-	file_err = load_game(argv[1], mem);
+	int file_err = load_game(argv[1], mem);
 	if(file_err) {
 		sdl_teardown(screen);
 		exit(-1);
@@ -39,7 +47,7 @@ int main(int argc, char **argv)
     	    }
 		}
 
-		cpu_cycle(debugFlag, mem, opcode);
+		cpu_cycle(debug_flag, mem, opcode);
 		tick(mem);
 
 		if(mem->draw_flag) {
@@ -47,7 +55,7 @@ int main(int argc, char **argv)
 		}
 		mem->draw_flag = 0;
 
-		SDL_Delay(20);
+		SDL_Delay(5);
 	}
 
 	sdl_teardown(screen);

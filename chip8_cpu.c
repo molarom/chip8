@@ -5,7 +5,7 @@
 #include <time.h>
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
-#include "chip8_sdl.h" // old_gfx, gfx, and draw_flag defined here.
+#include "chip8_sdl.h"
 
 void subroutine (chip8_mem *memory, chip8_opcode *opcode) 
 { 
@@ -24,7 +24,13 @@ void jump_to (chip8_mem *memory, chip8_opcode *opcode)
 
 void call (chip8_mem *memory, chip8_opcode *opcode) 
 {
-    push(memory);
+    int stk_rtn = 0;
+    stk_rtn = push(memory);
+    if(stk_rtn < 0){
+        printf("STACK OVERFLOW\n");
+        exit(-1);
+    }
+
     memory->PC = opcode->ADDR;
 }
 
@@ -75,12 +81,12 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
     case 0x3: memory->V[ opcode->VX ] ^= memory->V[ opcode->VY ]; break;
     
     case 0x4:
-        overflow_chk = memory->V[ opcode->VX ] + memory->V[ opcode->VX ];
+        overflow_chk = memory->V[ opcode->VX ] + memory->V[ opcode->VY ];
 
         if (overflow_chk > 255)
             memory->V[0xF] = 1;
 
-        memory->V[ opcode->VX ] = (uint8_t)(overflow_chk & 0x000000FF);
+        memory->V[ opcode->VX ] = (uint8_t)overflow_chk;
         break;
     
     case 0x5:
@@ -111,7 +117,7 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
         break;
     
     case 0xE:
-        if( memory->V[ opcode->VX ] & 0x01 )
+        if( (memory->V[ opcode->VX ] >> 7) & 0x01 )
             memory->V[0xF] = 1;
 
         memory->V[ opcode->VX ] = (memory->V[ opcode->VX ]) << 1;
@@ -143,9 +149,7 @@ void random_val (chip8_mem *memory, chip8_opcode *opcode)
 {
     // Use current time as seed for random number.
     srand(time(0));
-
-    opcode->NN = (rand() % 256) & 0xFF;
-    memory->V[ opcode->VX ] = opcode->NN;
+    memory->V[ opcode->VX ] = (rand() % 256) & opcode->NN;
 }
 
 void draw (chip8_mem *memory, chip8_opcode *opcode) 
@@ -206,7 +210,7 @@ void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
             if ( result > 0xFFF )
                 memory->V[0xF] = 1;
 
-            memory->I += result & 0xFFF;
+            memory->I = (uint16_t)result;
             break;
         case 0x29: memory->I = 5 * memory->V[ opcode->VX ]; break;
         case 0x33: 
@@ -223,7 +227,9 @@ void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
             for (int i = 0; i <= opcode->VX; i++) { 
                  memory->V[i] = memory->RAM[memory->I + i]; 
             }
-        break;
+            break;
+        default:
+            break;
     }
 }
 
@@ -245,7 +251,7 @@ void tick(chip8_mem *memory)
 
 int push(chip8_mem *memory)
 {
-    if (memory->SP >= STACK_SIZE-1) return -1;
+    if (memory->SP > STACK_SIZE) return -1;
 
     memory->STACK[memory->SP] = memory->PC;
     memory->SP++;

@@ -158,5 +158,5 @@ void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-    //printf("\033[25F");
+    printf("\033[25F");
 }

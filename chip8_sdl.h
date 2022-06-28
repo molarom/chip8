@@ -11,7 +11,7 @@
 #define WIDTH 64
 #define HEIGHT 32
 #define SCALE 10
-#define SDL_INIT_CHIP8 ( SDL_INIT_VIDEO | SDL_INIT_AUDIO )
+#define SDL_INIT_CHIP8 ( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS )
 
 // ------------------------------------------------------------------------
 // Structs to set up SDL for video output, and to map keypresses to fit 
@@ -25,22 +25,22 @@ typedef struct {
 } chip8_screen;
 
 static SDL_Scancode keypad[16] = {
-	SDL_SCANCODE_1,
-	SDL_SCANCODE_2,
-	SDL_SCANCODE_3,
-	SDL_SCANCODE_4,
-	SDL_SCANCODE_Q,
-	SDL_SCANCODE_W,
-	SDL_SCANCODE_E,
-	SDL_SCANCODE_R,
-	SDL_SCANCODE_A,
-	SDL_SCANCODE_S,
-	SDL_SCANCODE_D,
-	SDL_SCANCODE_F,
-	SDL_SCANCODE_Z,
-	SDL_SCANCODE_X,
-	SDL_SCANCODE_C,
-	SDL_SCANCODE_V
+	SDL_SCANCODE_X, 		// 0
+	SDL_SCANCODE_1,			// 1	
+	SDL_SCANCODE_2,			// 2
+	SDL_SCANCODE_3,			// 3 		
+	SDL_SCANCODE_Q,			// 4
+	SDL_SCANCODE_W,			// 5
+	SDL_SCANCODE_E,			// 6
+	SDL_SCANCODE_A,			// 7
+	SDL_SCANCODE_S,			// 8
+	SDL_SCANCODE_D,			// 9
+	SDL_SCANCODE_Z,			// A
+	SDL_SCANCODE_C,			// B
+	SDL_SCANCODE_4,			// C
+	SDL_SCANCODE_R,			// D
+	SDL_SCANCODE_F,			// E
+	SDL_SCANCODE_V			// F
 };
 
 // ------------------------------------------------------------------------
