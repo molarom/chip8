@@ -1,8 +1,8 @@
+#include <unistd.h>
+
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
 #include "chip8_sdl.h"
-
-#include <unistd.h>
 
 // Chip 8 fontset. Each number or character is 4 pixels wide and 5 pixels high.
 uint8_t chip8_fontset[80] = { 
@@ -50,7 +50,7 @@ int init_memory(int debug, chip8_mem *memory)
     memory->I       = 0x000;                  // Reset index register.
     memory->SP      = STACK_EMPTY;            // Reset stack pointer.
 
-    memset(memory->gfx, 0, sizeof memory->gfx );                       // Initialize output graphics array.
+    memset(memory->gfx, 0, sizeof memory->gfx );        // Initialize graphics array.
     memset(memory->STACK, 0, sizeof memory->STACK);     // Clear stack
     memset(memory->V, 0, sizeof memory->V);             // Clear registers V0-VF
     memset(memory->RAM, 0, sizeof memory->RAM);         // Clear memory
@@ -67,7 +67,7 @@ int init_memory(int debug, chip8_mem *memory)
     if (debug == 1) {
         // Verify the fontset was properly loaded.
         for (int i = 0; i < 0x50; i++) {
-            printf("Memory[%i]: %02x\n", i, memory->RAM[i]);
+            //printf("Memory[%i]: %02x\n", i, memory->RAM[i]);
         }
 
     }
@@ -121,10 +121,11 @@ int cpu_cycle(int debugFlag, chip8_mem *memory, chip8_opcode *opcode_digits)
     opcode_digits->NN = (opcode_digits->N) | (opcode_digits->VY) << 4;
     opcode_digits->DECODED = ((opcode_digits->OPCODE) & 0xF000) >> 12;
 
+    memory->PC += 2;
+
     if (debugFlag)
         debugMem(memory, opcode_digits);
-    
-    memory->PC += 2;
+
     subroutines[opcode_digits->DECODED](memory, opcode_digits);
 
     return 0;
@@ -158,5 +159,5 @@ void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("SP: %04x\n", memory->SP);
 
     // ANSI escape sequence to update in place.
-    printf("\033[25F");
+    //printf("\033[27F");
 }

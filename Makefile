@@ -1,7 +1,7 @@
 VPATH = %.o objfiles
 
 OBJSRC = chip8_sdl.c chip8_cpu.c chip8_mem.c main.c
-UNITSRC = Dchip8_sdl.c Dchip8_cpu.c Dchip8_mem.c Dunit_test.c
+UNITSRC = Dchip8_sdl.c Dchip8_cpu.c Dchip8_mem.c main.c
 
 CFLAGS = -Wall -Wextra 
 SDLLIBS = `sdl2-config --cflags --libs`
@@ -35,7 +35,7 @@ objfiles/Dchip8_mem.o: chip8_mem.c
 objfiles/Dchip8_sdl.o: chip8_sdl.c
 	gcc -g3 -c $< -o $@
 
-objfiles/Dunit_test.o: unit_test.c
+objfiles/Dunit_test.o: main.c
 	gcc -g3 -c $< -o $@
 
 .PHONY:

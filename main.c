@@ -40,6 +40,9 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
+	mem->RAM[0x1FF] = 3;
+	mem->RAM[0x1FE] = 1;
+
 	while (!quit){
     	if (SDL_PollEvent(&event)){
     	    if (event.type == SDL_QUIT){

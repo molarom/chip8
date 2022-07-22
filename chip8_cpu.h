@@ -44,7 +44,7 @@ void set_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
 void add_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
 
 /* 8XYN
-*   Multi Case Instruction, base on current value of N.
+*   Multi Case Instruction, based on current value of N.
 *  -------------------------
 *   0x0: Set VX to the value of VY.
 *   0x1: Set VX to the value of VX | VY (bitwise OR).
@@ -91,8 +91,8 @@ void keypress (chip8_mem *memory, chip8_opcode *opcode);
 *   FX18: Set sound timer to VX.
 *   FX1E: Add VX to I.
 *   FX29: Set I to the address of sprite data corresponding to the value stored in VX.
-*   FX33: Store the digits of VX at addresses I, I + 1, I + 2 starting from the most significant digit.
-*   FX55: Starting at VX[0] store each value in memory at I incrementing I for each register.
+*   FX33: Store the digits of VX at addresses I, I + X.
+*   FX55: Starting at V[X] store each value in memory at I incrementing I for each register.
 *   FX65: Inverse of 55, store each value of I starting at I[0] in the registers VX.
 */
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode);

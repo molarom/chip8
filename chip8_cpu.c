@@ -72,55 +72,70 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
 
     switch (opcode->N)
     {
-    case 0x0: memory->V[ opcode->VX ] = memory->V[ opcode->VY ]; break;
+    case 0x0: 
+        memory->V[ opcode->VX ] = memory->V[ opcode->VY ]; 
+        memory->V[0xF] = 0;
+        break;
 
-    case 0x1: memory->V[ opcode->VX ] |= memory->V[ opcode->VY ]; break;
+    case 0x1: 
+        memory->V[ opcode->VX ] |= memory->V[ opcode->VY ];
+        memory->V[0xF] = 0;
+        break;
     
-    case 0x2: memory->V[ opcode->VX ] &= memory->V[ opcode->VY ]; break;
+    case 0x2: 
+        memory->V[ opcode->VX ] &= memory->V[ opcode->VY ];
+        memory->V[0xF] = 0;
+        break;
     
-    case 0x3: memory->V[ opcode->VX ] ^= memory->V[ opcode->VY ]; break;
+    case 0x3: 
+        memory->V[ opcode->VX ] ^= memory->V[ opcode->VY ]; 
+        memory->V[0xF] = 0;
+        break;
     
     case 0x4:
         overflow_chk = memory->V[ opcode->VX ] + memory->V[ opcode->VY ];
 
-        if (overflow_chk > 255)
+        if (overflow_chk > 255){
             memory->V[0xF] = 1;
+        } else {
+            memory->V[0xF] = 0;
+        }
 
         memory->V[ opcode->VX ] = (uint8_t)overflow_chk;
         break;
     
     case 0x5:
+        memory->V[ opcode->VX ] -= memory->V[ opcode->VY ];
+
         if(memory->V[ opcode->VX ] > memory->V[ opcode->VY ]){
             memory->V[0xF] = 1;
         } else {
             memory->V[0xF] = 0;
         }
-        
-        memory->V[ opcode->VX ] -= memory->V[ opcode->VY ];
+          
         break;
 
-    case 0x6:
-        if( memory->V[ opcode->VX ] & 0x01 )
-            memory->V[0xF] = 1;
+    case 0x6: 
+        memory->V[ opcode->VX ] = (memory->V[ opcode->VY ] >> 1);
+        memory->V[0xF] = memory->V[ opcode->VY ] & 0x01;
 
-        memory->V[ opcode->VX ] = (memory->V[ opcode->VX ]) >> 1;
         break;
 
     case 0x7:
+        memory->V[ opcode->VX ] = memory->V[ opcode->VY ] - memory->V[ opcode->VX ];
+
         if(memory->V[ opcode->VX ] < memory->V[ opcode->VY ]) {
             memory->V[0xF] = 1;
         } else {
             memory->V[0xF] = 0;
         }
         
-        memory->V[ opcode->VX ] = memory->V[ opcode->VY ] - memory->V[ opcode->VX ];
         break;
     
     case 0xE:
-        if( (memory->V[ opcode->VX ] >> 7) & 0x01 )
-            memory->V[0xF] = 1;
+        memory->V[ opcode->VX ] = (memory->V[ opcode->VY ] << 1);
+        memory->V[0xF] = ((memory->V[ opcode->VY ] >> 7) & 0x1);
 
-        memory->V[ opcode->VX ] = (memory->V[ opcode->VX ]) << 1;
         break;
     
     default:
@@ -189,19 +204,22 @@ void keypress (chip8_mem *memory, chip8_opcode *opcode) {
 
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
     int result = 0;
+    int i = 0;
 
     switch (opcode->NN){
         case 0x07:
             memory->V[ opcode->VX ] = memory->delay_timer;
             break;
-        case 0x0A: 
-            for (int i = 0; i < 15; i++) {
-                if ( SDL_GetKeyboardState(NULL)[keypad[i]] )
+        case 0x0A:
+            for (; i < 15; i++) {
+                if (!SDL_GetKeyboardState(NULL)[keypad[i]]){
+                    memory->PC -= 2;
+                } else {
                     memory->V[ opcode->VX ] = i;
                     memory->PC += 4;
+                }
             }
-
-            memory->PC -= 2;
+            
             break;
         case 0x15: memory->delay_timer = memory->V[ opcode->VX ]; break;
         case 0x18: memory->sound_timer = memory->V[ opcode->VX ]; break;
@@ -219,14 +237,16 @@ void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
             memory->RAM[memory->I + 2] = (memory->V[ opcode->VX ] % 10);
             break;
         case 0x55: 
-            for (int i = 0; i <= opcode->VX; i++) { 
+            for (uint16_t i = 0; i <= opcode->VX; i++) {
                 memory->RAM[memory->I + i] = memory->V[i]; 
             }
+
             break;
-        case 0x65: 
-            for (int i = 0; i <= opcode->VX; i++) { 
-                 memory->V[i] = memory->RAM[memory->I + i]; 
+        case 0x65:
+            for (uint16_t i = 0; i <= opcode->VX; i++) {
+                memory->V[i] = memory->RAM[memory->I + i]; 
             }
+
             break;
         default:
             break;
