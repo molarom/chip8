@@ -2,6 +2,9 @@
 
 CHIP-8 emulator written in C using SDL as the graphics and input library. Used this as practice for learning more about C.
 
+<img width="642" alt="image" src="https://user-images.githubusercontent.com/90418639/183790391-1d35ce95-6732-47a5-b9b2-96c6703dfec9.png">
+
+
 ## Building
 
 ``` make chip8 ```
