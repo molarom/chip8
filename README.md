@@ -14,10 +14,6 @@ CHIP-8 emulator written in C using SDL as the graphics and input library. Used t
 ``` ./chip8 <rom.ch8>```
 ``` For debugging information add --debug ```
 
-## TODO
-
-- [ ] Add sound output.
-
 ## Credits & References
 
 * https://chip-8.github.io/links/

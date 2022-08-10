@@ -273,7 +273,7 @@ void tick(chip8_mem *memory)
 
     if (memory->sound_timer > 0) {
         if (--memory->sound_timer == 0)
-            printf("BEEP!\n");
+            fprintf(stdout,"\aBEEP!\n");
     }
 }
 
