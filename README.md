@@ -17,9 +17,6 @@ CHIP-8 emulator written in C using SDL as the graphics and input library. Used t
 ## TODO
 
 - [ ] Add sound output.
-- [ ] Fix collision bug.
-- [ ] Maybe add GUI?
-- [ ] Maybe add Super CHIP-8?
 
 ## Credits & References
 
