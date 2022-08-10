@@ -8,9 +8,14 @@
 
 int main(int argc, char **argv)
 {
+	SDL_Event event;
 	int debug_flag = 0;
 	int quit = 0;
-	SDL_Event event;
+
+	uint32_t start_time = 0;
+	uint32_t end_time = 0;
+	uint32_t delta = 0;
+	int time_per_frame = 16; // miliseconds. 1/60th ~= 16
 
 	if (argc > 2) {
 		if (strncmp(argv[2], "--debug", 7) == 0) {
@@ -40,10 +45,14 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	mem->RAM[0x1FF] = 3;
-	mem->RAM[0x1FE] = 1;
-
 	while (!quit){
+		// Get ms passed since start.
+		if (!start_time){
+			start_time = SDL_GetTicks();
+		} else {
+			delta = end_time - start_time;
+		}
+
     	if (SDL_PollEvent(&event)){
     	    if (event.type == SDL_QUIT){
     	        quit = 1;
@@ -58,7 +67,9 @@ int main(int argc, char **argv)
 		}
 		mem->draw_flag = 0;
 
-		SDL_Delay(5);
+		if (delta < time_per_frame) SDL_Delay(time_per_frame - delta);
+		start_time = end_time;
+		end_time = SDL_GetTicks();
 	}
 
 	sdl_teardown(screen);

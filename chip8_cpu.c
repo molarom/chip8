@@ -7,6 +7,9 @@
 #include "chip8_cpu.h"
 #include "chip8_sdl.h"
 
+#define PIXEL_ON 0xFFFFFF
+#define KEYPRESSED 0
+
 void subroutine (chip8_mem *memory, chip8_opcode *opcode) 
 { 
     if (opcode->OPCODE == 0x00E0) {
@@ -117,7 +120,7 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
 
     case 0x6: 
         memory->V[ opcode->VX ] = (memory->V[ opcode->VY ] >> 1);
-        memory->V[0xF] = memory->V[ opcode->VY ] & 0x01;
+        memory->V[0xF] = memory->V[ opcode->VY ] & 0x01 ? 1 : 0;
 
         break;
 
@@ -134,7 +137,7 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
     
     case 0xE:
         memory->V[ opcode->VX ] = (memory->V[ opcode->VY ] << 1);
-        memory->V[0xF] = ((memory->V[ opcode->VY ] >> 7) & 0x1);
+        memory->V[0xF] = (memory->V[ opcode->VY ] >> 7) & 0x01 ? 1 : 0;
 
         break;
     
@@ -176,14 +179,16 @@ void draw (chip8_mem *memory, chip8_opcode *opcode)
 
     for (int y_line = 0; y_line < opcode->N ; y_line++) {
         pixel = memory->RAM[ memory->I + y_line ];
+
         for (int x_line = 0; x_line < 8; x_line++) {
             if((pixel & (0x80 >> x_line)) != 0) {
                 int pixel_pos  = ((x + x_line) % WIDTH) + ((y + y_line) % HEIGHT) * WIDTH;
-                if(memory->gfx[pixel_pos] == 0xFFFFFF){
+                
+                if(memory->gfx[pixel_pos] == PIXEL_ON ){
                     memory->V[0xF] = 1;
                     memory->gfx[pixel_pos] = 0;
                 } else {
-                    memory->gfx[pixel_pos] = 0xFFFFFF;
+                    memory->gfx[pixel_pos] = PIXEL_ON;
                 }
             }
         }
@@ -205,6 +210,7 @@ void keypress (chip8_mem *memory, chip8_opcode *opcode) {
 void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
     int result = 0;
     int i = 0;
+    uint8_t key_flag = 0;
 
     switch (opcode->NN){
         case 0x07:
@@ -212,13 +218,17 @@ void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
             break;
         case 0x0A:
             for (; i < 15; i++) {
-                if (!SDL_GetKeyboardState(NULL)[keypad[i]]){
-                    memory->PC -= 2;
-                } else {
+                if (SDL_GetKeyboardState(NULL)[keypad[i]]){
+                    key_flag = KEYPRESSED;
                     memory->V[ opcode->VX ] = i;
-                    memory->PC += 4;
+                    memory->PC += 2;
+                } else {
+                    key_flag = 1;
                 }
             }
+
+            if (key_flag == 1)
+                memory->PC -= 2;
             
             break;
         case 0x15: memory->delay_timer = memory->V[ opcode->VX ]; break;
@@ -240,12 +250,14 @@ void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
             for (uint16_t i = 0; i <= opcode->VX; i++) {
                 memory->RAM[memory->I + i] = memory->V[i]; 
             }
+            memory->I += opcode->VX + 1;
 
             break;
         case 0x65:
             for (uint16_t i = 0; i <= opcode->VX; i++) {
                 memory->V[i] = memory->RAM[memory->I + i]; 
             }
+            memory->I += opcode->VX + 1;
 
             break;
         default:
