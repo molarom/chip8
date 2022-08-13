@@ -7,7 +7,9 @@ CHIP-8 emulator written in C using SDL as the graphics and input library. Used t
 
 ## Building
 
-``` make chip8 ```
+Install the SDL2 library. https://www.libsdl.org/download-2.0.php
+
+In the directory the repository is saved to, run ``` make chip8 ```
 
 ## Running
 
