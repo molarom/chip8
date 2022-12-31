@@ -1,8 +1,3 @@
-**/.vscode
-**/binary
-**/objfiles
-**/sdl_test
-debug_test
-.DS_Store
-old_Makefile
 chip8
+**/obj
+**/build
