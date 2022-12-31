@@ -1,28 +1,28 @@
-VPATH = %.o objfiles
+SRC_DIR := src
+OBJ_DIR := obj
+BUILD_DIR := build
 
-OBJSRC = chip8_sdl.c chip8_cpu.c chip8_mem.c main.c
+SOURCES := $(wildcard $(SRC_DIR)/*.c)
+OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
-CFLAGS = -Wall -Wextra 
-SDLLIBS = `sdl2-config --cflags --libs`
-OBJFILES = $(patsubst %.c,objfiles/%.o,$(OBJSRC))
+EXECUTABLE := chip8
 
-chip8: $(OBJFILES)
-	gcc $(CFLAGS) $? -o $@ $(SDLLIBS) 
+CC := gcc
+CFLAGS := -Wall -Wextra -pedantic -O2 -Dopt= -fprofile-use=chip8.profdata
+SDLLIB := `sdl2-config --cflags --libs`
 
+.PHONY: all clean
 
-objfiles/main.o: main.c
-	gcc -c $< -o $@
+all: $(BUILD_DIR)/$(EXECUTABLE)
 
-objfiles/chip8_cpu.o: chip8_cpu.c
-	gcc -c $< -o $@
+$(BUILD_DIR)/$(EXECUTABLE): $(OBJECTS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(SDLLIB)
 
-objfiles/chip8_mem.o: chip8_mem.c
-	gcc -c $< -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/*.h | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-objfiles/chip8_sdl.o: chip8_sdl.c
-	gcc -c $< -o $@
+$(OBJ_DIR) $(BUILD_DIR):
+	mkdir $@
 
-.PHONY:
-	clean
-clean :
-	rm objfiles/*.o chip8 test debug*
+clean:
+	rm -rf $(OBJ_DIR) $(BUILD_DIR)
