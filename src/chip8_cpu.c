@@ -2,6 +2,7 @@
 / * Contains functions which process CHIP8 OPCODEs.
 /------------------------------------------------------------------------*/
 
+#include <SDL2/SDL_keycode.h>
 #include <time.h>
 #include "chip8_mem.h"
 #include "chip8_cpu.h"
@@ -10,7 +11,7 @@
 #define PIXEL_ON 0xFFFFFF
 #define KEYPRESSED 0
 
-void subroutine (chip8_mem *memory, chip8_opcode *opcode) 
+void subroutine (chip8_mem memory, chip8_opcode opcode) 
 { 
     if (opcode->OPCODE == 0x00E0) {
 		memset(memory->gfx, 0, sizeof memory->gfx );
@@ -20,12 +21,12 @@ void subroutine (chip8_mem *memory, chip8_opcode *opcode)
 
  }
 
-void jump_to (chip8_mem *memory, chip8_opcode *opcode) 
+void jump_to (chip8_mem memory, chip8_opcode opcode) 
 { 
     memory->PC = opcode->ADDR;
 }
 
-void call (chip8_mem *memory, chip8_opcode *opcode) 
+void call (chip8_mem memory, chip8_opcode opcode) 
 {
     int stk_rtn = 0;
     stk_rtn = push(memory);
@@ -37,21 +38,21 @@ void call (chip8_mem *memory, chip8_opcode *opcode)
     memory->PC = opcode->ADDR;
 }
 
-void eval_eq_uchar (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_eq_uchar (chip8_mem memory, chip8_opcode opcode) 
 {
     if (memory->V[ opcode->VX ] == opcode->NN) {
         memory->PC += 2;
     }
 }
 
-void eval_ne (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_ne (chip8_mem memory, chip8_opcode opcode) 
 {
     if (memory->V[ opcode->VX ] != opcode->NN) {
         memory->PC += 2;
     }
 }
 
-void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_eq_reg (chip8_mem memory, chip8_opcode opcode) 
 {
     if (memory->V[ opcode->VX ] == memory->V[ opcode-> VY]) {
         memory->PC += 2;
@@ -59,17 +60,17 @@ void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode)
 
 }
 
-void set_val_to_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void set_val_to_reg (chip8_mem memory, chip8_opcode opcode) 
 {
     memory->V[ opcode->VX ] = opcode->NN;
 }
 
-void add_val_to_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void add_val_to_reg (chip8_mem memory, chip8_opcode opcode) 
 {
     memory->V[ opcode->VX ] += opcode->NN;
 }
 
-void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode) 
+void reg_sub_func (chip8_mem memory, chip8_opcode opcode) 
 {
     int overflow_chk = 0;
 
@@ -146,31 +147,31 @@ void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode)
     }
 }
 
-void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void eval_ne_reg (chip8_mem memory, chip8_opcode opcode) 
 {
     if ( memory->V[ opcode->VX ] != memory->V[opcode->VY] )
         memory->PC += 2; 
 }
 
-void set_index_reg (chip8_mem *memory, chip8_opcode *opcode) 
+void set_index_reg (chip8_mem memory, chip8_opcode opcode) 
 {
     memory->I = opcode->ADDR;
 }
 
-void jump_add_offset (chip8_mem *memory, chip8_opcode *opcode) 
+void jump_add_offset (chip8_mem memory, chip8_opcode opcode) 
 {
     memory->PC = opcode->ADDR + memory->V[opcode->VX];
     memory->PC--;
 }
 
-void random_val (chip8_mem *memory, chip8_opcode *opcode) 
+void random_val (chip8_mem memory, chip8_opcode opcode) 
 {
     // Use current time as seed for random number.
     srand(time(0));
     memory->V[ opcode->VX ] = (rand() % 256) & opcode->NN;
 }
 
-void draw (chip8_mem *memory, chip8_opcode *opcode) 
+void draw (chip8_mem memory, chip8_opcode opcode) 
 {
     int x = (memory->V[ opcode->VX ]);
     int y = (memory->V[ opcode->VY ]);
@@ -197,75 +198,98 @@ void draw (chip8_mem *memory, chip8_opcode *opcode)
     memory->draw_flag = 1;
 }
 
-void keypress (chip8_mem *memory, chip8_opcode *opcode) {
+static int _remapKey(SDL_Keycode k) {
+    switch (k){
+    case SDLK_x: return 0;
+    case SDLK_1: return 1;
+    case SDLK_2: return 2;
+    case SDLK_3: return 3;
+    case SDLK_q: return 4;
+    case SDLK_w: return 5;
+    case SDLK_e: return 6;
+    case SDLK_a: return 7;
+    case SDLK_s: return 8;
+    case SDLK_d: return 9;
+    case SDLK_z: return 10;
+    case SDLK_c: return 11;
+    case SDLK_4: return 12;
+    case SDLK_r: return 13;
+    case SDLK_f: return 14;
+    case SDLK_v: return 15;
+    default:
+        return -1;
+    }
+}
+
+void keypress (chip8_mem memory, chip8_opcode opcode) {
     if (opcode->NN == 0x9E){
-        if ( SDL_GetKeyboardState(NULL)[keypad[memory->V[ opcode->VX ]]] )
+        if ( _remapKey(memory->key) == memory->V[ opcode->VX ] )
              memory->PC += 2;
     } else if (opcode->NN == 0xA1) {
-        if ( !SDL_GetKeyboardState(NULL)[keypad[memory->V[ opcode->VX ]]] )
+        if ( _remapKey(memory->key) == memory->V[ opcode->VX ] )
             memory->PC += 2;
     }
 }
 
-void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode) {
+void subfunc_ex (chip8_mem memory, chip8_opcode opcode) {
     int result = 0;
     int i = 0;
     uint8_t key_flag = 0;
 
     switch (opcode->NN){
-        case 0x07:
-            memory->V[ opcode->VX ] = memory->delay_timer;
-            break;
-        case 0x0A:
-            for (; i < 15; i++) {
-                if (SDL_GetKeyboardState(NULL)[keypad[i]]){
-                    key_flag = KEYPRESSED;
-                    memory->V[ opcode->VX ] = i;
-                    memory->PC += 2;
-                } else {
-                    key_flag = 1;
-                }
+    case 0x07:
+        memory->V[ opcode->VX ] = memory->delay_timer;
+        break;
+    case 0x0A:
+        for (; i < 15; i++) {
+            if (memory->key){
+                key_flag = KEYPRESSED;
+                memory->V[ opcode->VX ] = i;
+                memory->PC += 2;
+            } else {
+                key_flag = 1;
             }
+        }
 
-            if (key_flag == 1)
-                memory->PC -= 2;
-            
-            break;
-        case 0x15: memory->delay_timer = memory->V[ opcode->VX ]; break;
-        case 0x18: memory->sound_timer = memory->V[ opcode->VX ]; break;
-        case 0x1E:
-            result = memory->I + (memory->V[ opcode->VX ]);
-            if ( result > 0xFFF )
-                memory->V[0xF] = 1;
+        if (key_flag == 1)
+            memory->PC -= 2;
+        
+        break;
+    case 0x15: memory->delay_timer = memory->V[ opcode->VX ]; break;
+    case 0x18: memory->sound_timer = memory->V[ opcode->VX ]; break;
+    case 0x1E:
+        result = memory->I + (memory->V[ opcode->VX ]);
+        if ( result > 0xFFF )
+            memory->V[0xF] = 1;
 
-            memory->I = (uint16_t)result;
-            break;
-        case 0x29: memory->I = 5 * memory->V[ opcode->VX ]; break;
-        case 0x33: 
-            memory->RAM[memory->I] = (memory->V[ opcode->VX ] % 1000) / 100;
-            memory->RAM[memory->I + 1] = (memory->V[ opcode->VX ] % 100) / 10;
-            memory->RAM[memory->I + 2] = (memory->V[ opcode->VX ] % 10);
-            break;
-        case 0x55: 
-            for (uint16_t i = 0; i <= opcode->VX; i++) {
-                memory->RAM[memory->I + i] = memory->V[i]; 
-            }
-            memory->I += opcode->VX + 1;
+        memory->I = (uint16_t)result;
+        break;
+    case 0x29: memory->I = 5 * memory->V[ opcode->VX ]; break;
+    case 0x33: 
+        memory->RAM[memory->I] = (memory->V[ opcode->VX ] % 1000) / 100;
+        memory->RAM[memory->I + 1] = (memory->V[ opcode->VX ] % 100) / 10;
+        memory->RAM[memory->I + 2] = (memory->V[ opcode->VX ] % 10);
+        break;
+    case 0x55: 
+        for (uint16_t i = 0; i <= opcode->VX; i++) {
+            memory->RAM[memory->I + i] = memory->V[i]; 
+        }
+        memory->I += opcode->VX + 1;
 
-            break;
-        case 0x65:
-            for (uint16_t i = 0; i <= opcode->VX; i++) {
-                memory->V[i] = memory->RAM[memory->I + i]; 
-            }
-            memory->I += opcode->VX + 1;
+        break;
+    case 0x65:
+        for (uint16_t i = 0; i <= opcode->VX; i++) {
+            memory->V[i] = memory->RAM[memory->I + i]; 
+        }
+        memory->I += opcode->VX + 1;
 
-            break;
-        default:
-            break;
+        break;
+    default:
+        break;
     }
 }
 
-void tick(chip8_mem *memory)
+void tick(chip8_mem memory)
 {
     if (memory->delay_timer > 0) {
         --memory->delay_timer;
@@ -281,7 +305,7 @@ void tick(chip8_mem *memory)
 / * Functions for handling the stack, helps with readability.
 /------------------------------------------------------------------------*/
 
-int push(chip8_mem *memory)
+int push(chip8_mem memory)
 {
     if (memory->SP > STACK_SIZE) return -1;
 
@@ -290,7 +314,7 @@ int push(chip8_mem *memory)
     return 0;
 }
 
-uint16_t pop(chip8_mem *memory)
+uint16_t pop(chip8_mem memory)
 {
     if (memory->SP == STACK_EMPTY) return memory->PC;
 

@@ -8,7 +8,7 @@ OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 EXECUTABLE := chip8
 
 CC := gcc
-CFLAGS := -Wall -Wextra -pedantic -O2 -Dopt= -fprofile-use=chip8.profdata
+CFLAGS := -Wall -Wextra -pedantic -g -pg
 SDLLIB := `sdl2-config --cflags --libs`
 
 .PHONY: all clean

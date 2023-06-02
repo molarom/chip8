@@ -1,3 +1,4 @@
+#include <SDL2/SDL_keyboard.h>
 #include <unistd.h>
 
 #include "chip8_mem.h"
@@ -44,7 +45,7 @@ opcode_func subroutines[16] = {
     &subfunc_ex                 //FXXX
 };
 
-int init_memory(int debug, chip8_mem *memory)
+int init_memory(int debug, chip8_mem memory)
 {
     memory->PC      = 0x200;                  // Program counter starts at 0x200.
     memory->I       = 0x000;                  // Reset index register.
@@ -75,7 +76,7 @@ int init_memory(int debug, chip8_mem *memory)
     return 0;
 }
 
-int load_game(char *game, chip8_mem *memory)
+int load_game(char *game, chip8_mem memory)
 {
     FILE * fp;
 
@@ -107,7 +108,7 @@ int load_game(char *game, chip8_mem *memory)
     return 0;
 }
 
-int cpu_cycle(int debugFlag, chip8_mem *memory, chip8_opcode *opcode_digits)
+int cpu_cycle(int debugFlag, chip8_mem memory, chip8_opcode opcode_digits)
 {
     opcode_digits->OPCODE = memory->RAM[memory->PC];
     opcode_digits->OPCODE <<= 8;
@@ -131,7 +132,7 @@ int cpu_cycle(int debugFlag, chip8_mem *memory, chip8_opcode *opcode_digits)
     return 0;
 }
 
-void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
+void debugMem (chip8_mem memory, chip8_opcode opcode_digits) {
     printf("----------OPCODES------------\n");
     printf("OPCODE: %04x \n", opcode_digits->OPCODE);
     printf("DECODED: %04x \n", opcode_digits->DECODED);
@@ -157,8 +158,10 @@ void debugMem (chip8_mem *memory, chip8_opcode *opcode_digits) {
     printf("\n-----------STACK------------\n");
     printf("STACK[0]: %04x\n", memory->STACK[0]);
     printf("SP: %04x\n", memory->SP);
+    printf("\n------------KEY------------\n");
+    printf("KEY_PRESSED: %s\n", SDL_GetKeyName(memory->key));
 
     // ANSI escape sequence to update in place.
-    printf("\033[27F");
+    printf("\033[30F");
 }
 

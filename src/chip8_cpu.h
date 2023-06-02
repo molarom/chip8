@@ -1,47 +1,49 @@
 #ifndef CHIP8_CPU_H_
 #define CHIP8_CPU_H_
 
+#include "chip8_mem.h"
+
 /*------------------------------------------------------------------------/
 / *  Typdef for function pointers for CHIP 8 OPCODE processing.
 /------------------------------------------------------------------------*/
 
-typedef void (*opcode_func)(chip8_mem *, chip8_opcode *);
+typedef void(*opcode_func)(chip8_mem, chip8_opcode);
 
 /*------------------------------------------------------------------------/
 / * Function prototypes.
 /------------------------------------------------------------------------*/
 
 // 0XXX: CLR if 00E0. RTN from subroutine otherwise.
-void subroutine (chip8_mem *memory, chip8_opcode *opcode);
+void subroutine (chip8_mem memory, chip8_opcode opcode);
 
 // 1XXX: JMP to NNN.
-void jump_to (chip8_mem *memory, chip8_opcode *opcode);
+void jump_to (chip8_mem memory, chip8_opcode opcode);
 
 // 2XXX: Call subroutine at NNN.
-void call (chip8_mem *memory, chip8_opcode *opcode);
+void call (chip8_mem memory, chip8_opcode opcode);
 
 /*------------------------------------------------------------------------/
 / * Skip next instruction if condition.
 /------------------------------------------------------------------------*/
 
 // 3XXX: If VX != NN
-void eval_eq_uchar (chip8_mem *memory, chip8_opcode *opcode);
+void eval_eq_uchar (chip8_mem memory, chip8_opcode opcode);
 
 // 4XXX: If VX == NN
-void eval_ne (chip8_mem *memory, chip8_opcode *opcode);
+void eval_ne (chip8_mem memory, chip8_opcode opcode);
 
 // 5XXX: If VX != VY
-void eval_eq_reg (chip8_mem *memory, chip8_opcode *opcode);
+void eval_eq_reg (chip8_mem memory, chip8_opcode opcode);
 
 // 6XXX: If VX == VY
-void set_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
+void set_val_to_reg (chip8_mem memory, chip8_opcode opcode);
 
 /*------------------------------------------------------------------------/
 / * Register Manipulation functions.
 /------------------------------------------------------------------------*/
 
 // 7XXX: Add NN to VX.
-void add_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
+void add_val_to_reg (chip8_mem memory, chip8_opcode opcode);
 
 /* 8XYN
 *   Multi Case Instruction, based on current value of N.
@@ -56,19 +58,19 @@ void add_val_to_reg (chip8_mem *memory, chip8_opcode *opcode);
 *   0x7: Set VX to VY - VX. Set VF = 0 if borrow.
 *   0xE: Shift VX one bit to the left. Set VF = 1 if most significant bit is set.
 */
-void reg_sub_func (chip8_mem *memory, chip8_opcode *opcode);
+void reg_sub_func (chip8_mem memory, chip8_opcode opcode);
 
 // 9XY0: Skip if VX != VY.
-void eval_ne_reg (chip8_mem *memory, chip8_opcode *opcode);
+void eval_ne_reg (chip8_mem memory, chip8_opcode opcode);
 
 // ANNN: Set I to NNN.
-void set_index_reg (chip8_mem *memory, chip8_opcode *opcode);
+void set_index_reg (chip8_mem memory, chip8_opcode opcode);
 
 // BXNN: Jump to NNN + the value of VX.
-void jump_add_offset (chip8_mem *memory, chip8_opcode *opcode);
+void jump_add_offset (chip8_mem memory, chip8_opcode opcode);
 
 // Set VX to a random number with offset of NN.
-void random_val (chip8_mem *memory, chip8_opcode *opcode);
+void random_val (chip8_mem memory, chip8_opcode opcode);
 
 /* DXYN
 *   Draw a sprite at position (VX,VY) with N bytes of sprite data starting at I.
@@ -76,13 +78,13 @@ void random_val (chip8_mem *memory, chip8_opcode *opcode);
 *   If current pixel is on, set VF = 1 then turn pixel off.
 *   Sets draw flag for main loop.
 */
-void draw (chip8_mem *memory, chip8_opcode *opcode);
+void draw (chip8_mem memory, chip8_opcode opcode);
 
 /* 
 * EX9E: Skip if key corresponding to value in VX is pressed.
 * EXA1: Skip if key corresponding to value in VX is not pressed.
 */
-void keypress (chip8_mem *memory, chip8_opcode *opcode);
+void keypress (chip8_mem memory, chip8_opcode opcode);
 
 /* 
 *   FX07: Store delay timer in VX.
@@ -95,10 +97,10 @@ void keypress (chip8_mem *memory, chip8_opcode *opcode);
 *   FX55: Starting at V[X] store each value in memory at I incrementing I for each register.
 *   FX65: Inverse of 55, store each value of I starting at I[0] in the registers VX.
 */
-void subfunc_ex (chip8_mem *memory, chip8_opcode *opcode);
+void subfunc_ex (chip8_mem memory, chip8_opcode opcode);
 
 // Timer manipulation, decrements timers if > 0. Runs independently of main processing.
-void tick (chip8_mem *memory);
+void tick (chip8_mem memory);
 
 /*------------------------------------------------------------------------/
 / * Stack handling functions.
@@ -106,8 +108,8 @@ void tick (chip8_mem *memory);
 #define STACK_SIZE 15
 #define STACK_EMPTY 0
 
-int push(chip8_mem *memory);
-uint16_t pop(chip8_mem *memory);
+int push(chip8_mem memory);
+uint16_t pop(chip8_mem memory);
 
 #endif
 
